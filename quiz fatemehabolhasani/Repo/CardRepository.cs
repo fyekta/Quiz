@@ -17,7 +17,7 @@ namespace quiz_fatemehabolhasani.Repo
             _context = context;
         }
 
-        public Card GetByCardNumber(string cardNumber)
+        public Card GetByNumber(string cardNumber)
         {
             return _context.Cards.FirstOrDefault(c => c.CardNumber == cardNumber);
         }
@@ -31,6 +31,11 @@ namespace quiz_fatemehabolhasani.Repo
         public bool Exists(string cardNumber)
         {
             return _context.Cards.Any(c => c.CardNumber == cardNumber);
+        }
+        //
+        public List<Card> GetAll()
+        {
+            return _context.Cards.ToList(); 
         }
     }
 }

@@ -9,8 +9,9 @@ namespace quiz_fatemehabolhasani.Repo
 {
     public interface ICardRepository
     {
-        Card GetByCardNumber(string cardNumber);
+        Card GetByNumber(string cardNumber);
         void Update(Card card);
         bool Exists(string cardNumber);
+        List<Card> GetAll();
     }
 }

@@ -4,18 +4,23 @@ using quiz_fatemehabolhasani.Repo;
 using quiz_fatemehabolhasani.Service;
 using quiz_fatemehabolhasani.Data;
 
+
+
 class Program
 {
     static void Main(string[] args)
     {
+       
         var context = new AppDbContext();
         var cardRepo = new CardRepository(context);
         var transactionRepo = new TransactionRepository(context);
         var bankService = new BankService(cardRepo, transactionRepo);
 
+       
+
         Console.WriteLine("Bank Service");
 
-        Card currentUser = null;
+        Card loggedInCard = null;
 
         while (true)
         {
@@ -27,9 +32,9 @@ class Program
                 Console.Write("Password: ");
                 string password = Console.ReadLine();
 
-                currentUser = bankService.Authenticate(cardNumber, password);
+                loggedInCard = bankService.Login(cardNumber, password);
 
-                Console.WriteLine($"Wellcome {currentUser.HolderName}!");
+                Console.WriteLine($"Wellcome {loggedInCard.HolderName}!");
                 break;
             }
             catch (Exception ex)
@@ -38,67 +43,68 @@ class Program
             }
         }
 
-      
         while (true)
         {
-            Console.WriteLine("\n--------- Menu ---------");
-            Console.WriteLine("1. Transfer Money");
-            Console.WriteLine("2. Show Transactoins");
-            Console.WriteLine("3. Exit");
-            Console.Write("Choose: ");
+            Console.WriteLine("\n=== Menu ===");
+            Console.WriteLine("1. Transfer money");
+            Console.WriteLine("2. Show Transfer");
+            Console.WriteLine("3. Change Password");
+            Console.WriteLine("4. Exit");
 
+            Console.Write("Choose: ");
             string choice = Console.ReadLine();
 
-            try
+            if (choice == "1")
             {
-                if (choice == "1")
-                {
-                    Console.Write("Destination card number: ");
-                    string destCard = Console.ReadLine();
+                Console.Write("dst card: ");
+                string dstCardNumber = Console.ReadLine();
 
-                    Console.Write("Amount: ");
-                    string inputAmount = Console.ReadLine();
+                string holderName = bankService.GetHolderName(dstCardNumber);
+                Console.WriteLine("name: " + holderName);
 
-                    if (!float.TryParse(inputAmount, out float amount))
-                    {
-                        Console.WriteLine("Eror");
-                        continue;
-                    }
+                string code = bankService.GenerateCode();
+                Console.WriteLine($"code: {code}");
 
-                    bankService.Transfer(currentUser.CardNumber, destCard, amount);
-                    Console.WriteLine("The transfer was successful.");
-                }
-                else if (choice == "2")
-                {
-                    var transactions = bankService.GetTransactions(currentUser.CardNumber);
+                Console.Write("code: ");
+                string inputCode = Console.ReadLine();
 
-                    if (transactions.Count == 0)
-                    {
-                        Console.WriteLine("No transactions found.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Transaction list:");
-                        foreach (var t in transactions)
-                        {
-                            Console.WriteLine($"from: {t.SourceCardNumber} to: {t.DestinationCardNumber} | Amount: {t.Amount} | Date: {t.TransactionDate} | Successful: {(t.IsSuccessful ? "YES" : "NO")}");
-                        }
-                    }
-                }
-                else if (choice == "3")
+                if (!bankService.ValidateCode(inputCode))
                 {
-                    Console.WriteLine("Exit");
-                    break;
+                    Console.WriteLine("The verification code is incorrect or expired. The transaction was canceled.");
+                    continue;
                 }
-                else
+
+                Console.Write("Amount: ");
+                if (!float.TryParse(Console.ReadLine(), out float amount))
                 {
-                    Console.WriteLine("Eror.");
+                    Console.WriteLine("The amount entered is not valid.");
+                    continue;
                 }
+
+                string result = bankService.Transfer(loggedInCard.CardNumber, dstCardNumber, amount);
+                Console.WriteLine(result);
             }
-            catch (Exception ex)
+            else if (choice == "2")
             {
-                Console.WriteLine("Eror: " + ex.Message);
+                bankService.ShowTransactions(loggedInCard.CardNumber);
+            }
+            else if (choice == "3")
+            {
+                Console.Write("New Password: ");
+                string newPass = Console.ReadLine();
+
+                bankService.ChangePassword(loggedInCard.CardNumber, newPass);
+            }
+            else if (choice == "4")
+            {
+                Console.WriteLine("Exit");
+                break;
+            }
+            else
+            {
+                Console.WriteLine("Eror");
             }
         }
     }
 }
+

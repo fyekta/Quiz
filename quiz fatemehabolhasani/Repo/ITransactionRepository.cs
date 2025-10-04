@@ -10,5 +10,6 @@ namespace quiz_fatemehabolhasani.Repo
     {
         void Add(Transaction transaction);
         List<Transaction> GetByCardNumber(string cardNumber);
+        float GetTodayTotal(string cardNumber);
     }
 }

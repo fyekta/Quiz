@@ -31,5 +31,13 @@ namespace quiz_fatemehabolhasani.Repo
                 .OrderByDescending(t => t.TransactionDate)
                 .ToList();
         }
+        //
+        public float GetTodayTotal(string cardNumber)
+        {
+            var today = DateTime.Today;
+            return _context.Transactions
+                .Where(t => t.SourceCardNumber == cardNumber && t.TransactionDate.Date == today && t.IsSuccessful)
+                .Sum(t => t.Amount);
+        }
     }
 }
