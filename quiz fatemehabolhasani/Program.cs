@@ -41,7 +41,6 @@ class Program
                 Console.WriteLine($"Eror: {ex.Message}");
             }
         }
-
         while (true)
         {
             Console.WriteLine("=== Menu ===");
@@ -53,57 +52,65 @@ class Program
             Console.Write("Choose: ");
             string choice = Console.ReadLine();
 
-            if (choice == "1")
+            try
             {
-                Console.Write("dst card: ");
-                string dstCardNumber = Console.ReadLine();
-
-                string holderName = bankService.GetHolderName(dstCardNumber);
-                Console.WriteLine("name: " + holderName);
-
-                string code = bankService.GenerateCode();
-                Console.WriteLine($"code: {code}");
-
-                Console.Write("code: ");
-                string inputCode = Console.ReadLine();
-
-                if (!bankService.ValidateCode(inputCode))
+                if (choice == "1")
                 {
-                    Console.WriteLine("The verification code is incorrect or expired. The transaction was canceled.");
-                    continue;
-                }
+                    Console.Write("dst card: ");
+                    string dstCardNumber = Console.ReadLine();
 
-                Console.Write("Amount: ");
-                if (!float.TryParse(Console.ReadLine(), out float amount))
+                    string holderName = bankService.GetHolderName(dstCardNumber);
+                    Console.WriteLine("name: " + holderName);
+
+                    string code = bankService.GenerateCode();
+                    Console.WriteLine($"code: {code}");
+
+                    Console.Write("code: ");
+                    string inputCode = Console.ReadLine();
+
+                    if (!bankService.ValidateCode(inputCode))
+                    {
+                        Console.WriteLine("The verification code is incorrect or expired. The transaction was canceled.");
+                        continue;
+                    }
+
+                    Console.Write("Amount: ");
+                    if (!float.TryParse(Console.ReadLine(), out float amount))
+                    {
+                        Console.WriteLine("The amount entered is not valid.");
+                        continue;
+                    }
+
+                    string result = bankService.Transfer(loggedInCard.CardNumber, dstCardNumber, amount);
+                    Console.WriteLine(result);
+                }
+                else if (choice == "2")
                 {
-                    Console.WriteLine("The amount entered is not valid.");
-                    continue;
+                    bankService.ShowTransactions(loggedInCard.CardNumber);
                 }
+                else if (choice == "3")
+                {
+                    Console.Write("New Password: ");
+                    string newPass = Console.ReadLine();
 
-                string result = bankService.Transfer(loggedInCard.CardNumber, dstCardNumber, amount);
-                Console.WriteLine(result);
+                    bankService.ChangePassword(loggedInCard.CardNumber, newPass);
+                }
+                else if (choice == "4")
+                {
+                    Console.WriteLine("Exit");
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Eror");
+                }
             }
-            else if (choice == "2")
+            catch (Exception ex)
             {
-                bankService.ShowTransactions(loggedInCard.CardNumber);
-            }
-            else if (choice == "3")
-            {
-                Console.Write("New Password: ");
-                string newPass = Console.ReadLine();
-
-                bankService.ChangePassword(loggedInCard.CardNumber, newPass);
-            }
-            else if (choice == "4")
-            {
-                Console.WriteLine("Exit");
-                break;
-            }
-            else
-            {
-                Console.WriteLine("Eror");
+                Console.WriteLine($"Error: {ex.Message}");
             }
         }
+
     }
 }
 

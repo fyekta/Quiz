@@ -34,18 +34,19 @@ namespace quiz_fatemehabolhasani.Service
 
             if (card.Password != password)
             {
-                _cardRepo.IncrementFailedAttempts(cardNumber);
+                int failedAttempts = _cardRepo.IncrementFailedAttemptsAndGet(cardNumber);
 
-                if (card.FailedAttempts + 1 >= 3)
+                if (failedAttempts  -1 >= 3)
                 {
                     _cardRepo.SetIsActive(cardNumber, false);
                     throw new Exception("Your card has been blocked due to entering the wrong password 3 times.");
                 }
 
-                throw new Exception($"The password is incorrect. Number of attempts remaining: {2 - card.FailedAttempts}");
+                throw new Exception($"The password is incorrect. Number of attempts remaining: {3 - failedAttempts}");
             }
 
             _cardRepo.ResetFailedAttempts(cardNumber);
+
 
             return card;
         }

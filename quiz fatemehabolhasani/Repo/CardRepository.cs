@@ -73,5 +73,15 @@ namespace quiz_fatemehabolhasani.Repo
                 .ExecuteUpdate(setters => setters
                     .SetProperty(c => c.Balance, newBalance));
         }
+        public int IncrementFailedAttemptsAndGet(string cardNumber)
+        {
+            var card = _context.Cards.FirstOrDefault(c => c.CardNumber == cardNumber);
+           
+            card.FailedAttempts++;
+            _context.SaveChanges();
+
+            return card.FailedAttempts;
+        }
+       
     }
 }
