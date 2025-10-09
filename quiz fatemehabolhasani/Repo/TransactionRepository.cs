@@ -31,7 +31,6 @@ namespace quiz_fatemehabolhasani.Repo
                 .OrderByDescending(t => t.TransactionDate)
                 .ToList();
         }
-        //
         public float GetTodayTotal(string cardNumber)
         {
             var today = DateTime.Today;

@@ -42,14 +42,6 @@ namespace quiz_fatemehabolhasani.Repo
                     .SetProperty(c => c.IsActive, isActive));
         }
 
-        public void IncrementFailedAttempts(string cardNumber)
-        {
-            _context.Cards
-                .Where(c => c.CardNumber == cardNumber)
-                .ExecuteUpdate(setters => setters
-                    .SetProperty(c => c.FailedAttempts, c => c.FailedAttempts + 1));
-        }
-
         public void ResetFailedAttempts(string cardNumber)
         {
             _context.Cards
