@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace quiz_fatemehabolhasani.Service
 {
-    
+
     public interface IBankService
     {
         Card Login(string cardNumber, string password);
         string Transfer(string srcNumber, string dstNumber, float amount);
-        void ShowTransactions(string cardNumber);
         void ChangePassword(string cardNumber, string newPassword);
+        void ShowTransactions(string cardNumber);
         string GenerateCode();
         bool ValidateCode(string codeInput);
         string GetHolderName(string cardNumber);

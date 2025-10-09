@@ -17,4 +17,5 @@ namespace quiz_fatemehabolhasani.Entities
         public Card SourceCard { get; set; }
         public Card DestinationCard { get; set; }
     }
+    
 }

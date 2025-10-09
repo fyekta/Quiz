@@ -7,11 +7,17 @@ using System.Threading.Tasks;
 
 namespace quiz_fatemehabolhasani.Repo
 {
+    
     public interface ICardRepository
     {
         Card GetByNumber(string cardNumber);
-        void Update(Card card);
         bool Exists(string cardNumber);
         List<Card> GetAll();
+
+        void SetIsActive(string cardNumber, bool isActive);
+        void IncrementFailedAttempts(string cardNumber);
+        void ResetFailedAttempts(string cardNumber);
+        void UpdatePassword(string cardNumber, string newPassword);
+        void UpdateBalance(string cardNumber, float newBalance);
     }
 }

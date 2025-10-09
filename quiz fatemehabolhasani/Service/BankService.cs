@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace quiz_fatemehabolhasani.Service
 {
+    
     public class BankService : IBankService
     {
+        
         private readonly ICardRepository _cardRepo;
         private readonly ITransactionRepository _transRepo;
 
@@ -18,6 +20,7 @@ namespace quiz_fatemehabolhasani.Service
             _cardRepo = cardRepo;
             _transRepo = transRepo;
         }
+
 
         public Card Login(string cardNumber, string password)
         {
@@ -31,28 +34,25 @@ namespace quiz_fatemehabolhasani.Service
 
             if (card.Password != password)
             {
-                card.FailedAttempts++;
-                if (card.FailedAttempts >= 3)
+                _cardRepo.IncrementFailedAttempts(cardNumber);
+
+                if (card.FailedAttempts + 1 >= 3)
                 {
-                    card.IsActive = false;
-                    _cardRepo.Update(card);
+                    _cardRepo.SetIsActive(cardNumber, false);
                     throw new Exception("Your card has been blocked due to entering the wrong password 3 times.");
                 }
-                _cardRepo.Update(card);
-                throw new Exception($"The password is incorrect. Number of attempts remaining: {3 - card.FailedAttempts}");
+
+                throw new Exception($"The password is incorrect. Number of attempts remaining: {2 - card.FailedAttempts}");
             }
 
-            card.FailedAttempts = 0;
-            _cardRepo.Update(card);
+            _cardRepo.ResetFailedAttempts(cardNumber);
 
             return card;
         }
 
-        
         public string Transfer(string srcNumber, string dstNumber, float amount)
         {
             if (srcNumber == dstNumber)
-                
                 throw new Exception("The origin and destination cards cannot be the same.");
 
             if (amount <= 0)
@@ -64,12 +64,10 @@ namespace quiz_fatemehabolhasani.Service
             var src = _cardRepo.GetByNumber(srcNumber);
             var dst = _cardRepo.GetByNumber(dstNumber);
 
-            
-
-             if (srcNumber == null)
+            if (src == null)
                 throw new Exception("Origin card not found.");
 
-            if (dstNumber == null)
+            if (dst == null)
                 throw new Exception("Destination card not found.");
 
             if (!src.IsActive)
@@ -91,11 +89,11 @@ namespace quiz_fatemehabolhasani.Service
             if (src.Balance < total)
                 return "not mony";
 
-            src.Balance -= total;
-            dst.Balance += amount;
+            float newSrcBalance = src.Balance - total;
+            float newDstBalance = dst.Balance + amount;
 
-            _cardRepo.Update(src);
-            _cardRepo.Update(dst);
+            _cardRepo.UpdateBalance(srcNumber, newSrcBalance);
+            _cardRepo.UpdateBalance(dstNumber, newDstBalance);
 
             var transaction = new Transaction
             {
@@ -113,12 +111,8 @@ namespace quiz_fatemehabolhasani.Service
             }
             catch
             {
-               
-                src.Balance += total;
-                dst.Balance -= amount;
-
-                _cardRepo.Update(src);
-                _cardRepo.Update(dst);
+                _cardRepo.UpdateBalance(srcNumber, src.Balance);
+                _cardRepo.UpdateBalance(dstNumber, dst.Balance);
 
                 transaction.IsSuccessful = false;
                 _transRepo.Add(transaction);
@@ -126,13 +120,13 @@ namespace quiz_fatemehabolhasani.Service
                 return "Error in recording transaction. Amount was returned to the originating card.";
             }
         }
+
         public void ChangePassword(string cardNumber, string newPassword)
         {
             var card = _cardRepo.GetByNumber(cardNumber);
             if (card != null && card.IsActive)
             {
-                card.Password = newPassword;
-                _cardRepo.Update(card);
+                _cardRepo.UpdatePassword(cardNumber, newPassword);
                 Console.WriteLine("Password changed successfully.");
             }
             else
@@ -180,5 +174,4 @@ namespace quiz_fatemehabolhasani.Service
             return card != null ? card.HolderName : "Not Found card";
         }
     }
-   
 }

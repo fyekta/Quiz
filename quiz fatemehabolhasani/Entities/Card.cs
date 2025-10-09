@@ -18,4 +18,5 @@ namespace quiz_fatemehabolhasani.Entities
         public List<Transaction> TransactionsAsSource { get; set; } = new List<Transaction>();
         public List<Transaction> TransactionsAsDestination { get; set; } = new List<Transaction>();
     }
+    
 }
